@@ -1,6 +1,5 @@
 package com.ultracookies.trading.matchingengine;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -16,19 +15,21 @@ public class Order {
     private UUID orderId;
     private final Instant timeReceived;
 
-    @NotBlank
+    @NotBlank(message = "Ticker symbol is required")
     private final String symbol;
 
-    @NotNull
+    @NotNull(message = "Order type is required (e.g. LIMIT)")
     private final OrderType orderType;
 
-    @NotNull
+    @NotNull(message = "Order side is required (e.g. BUY, SELL)")
     private final OrderSide orderSide;
 
+    @NotNull(message = "Quantity is required (>= 1)")
     @Min(value = 1, message = "Quantity must be at least 1")
     private final Integer quantity;
 
-    @DecimalMin(value = "0.01", message = "Price must be at least one cent")
+    @NotNull(message = "Price is required (>= 0.01)")
+    @DecimalMin(value = "0.01", message = "Price must be at least 0.01")
     private final BigDecimal price;
 
     public Order(String symbol, OrderType orderType,
