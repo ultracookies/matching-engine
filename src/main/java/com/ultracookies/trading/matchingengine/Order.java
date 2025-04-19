@@ -15,14 +15,11 @@ public class Order {
     private UUID orderId;
     private final Instant timeReceived;
 
+    private final OrderType orderType;
+    private final OrderSide orderSide;
+
     @NotBlank(message = "Ticker symbol is required")
     private final String symbol;
-
-    @NotNull(message = "Order type is required (e.g. LIMIT)")
-    private final OrderType orderType;
-
-    @NotNull(message = "Order side is required (e.g. BUY, SELL)")
-    private final OrderSide orderSide;
 
     @NotNull(message = "Quantity is required (>= 1)")
     @Min(value = 1, message = "Quantity must be at least 1")
