@@ -21,6 +21,9 @@ public class OrderController {
     @PostMapping(value = "/api/orders")
     public void processOrder(@Valid @RequestBody Order order) {
         order.setOrderId(UUID.randomUUID());
+        if (!symbolRegistryService.symbolExists(order.getSymbol()))
+            throw new NonExistentTicker("Security with " + order.getSymbol() + " does not exist");
+
         orderBookService.publishOrder(order);
     }
 

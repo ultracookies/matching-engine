@@ -3,6 +3,7 @@ package com.ultracookies.trading.matchingengine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -63,6 +64,33 @@ public class OrderControllerUnitTests {
 //
 //        Assertions.assertInstanceOf(HttpMessageNotReadableException.class, result.getResolvedException());
 //    }
+
+    @Test
+    void checkForNonExistentSymbol() throws Exception {
+        Mockito.when(symbolRegistryService.symbolExists(Mockito.anyString())).thenReturn(false);
+
+        var symbol = "ZZZZZZ";
+
+        var body = Map.of(
+                "orderType", "LIMIT",
+                "orderSide", "BUY",
+                "symbol", symbol,
+                "quantity", "1",
+                "price", "1"
+        );
+
+        var result = mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title", is("Invalid order parameter(s)")))
+                .andExpect(jsonPath("$.detail", is("Security with " + symbol + " does not exist")))
+                .andReturn();
+
+        Assertions.assertInstanceOf(NonExistentTicker.class, result.getResolvedException());
+
+    }
 
     @Test
     void checkForInvalidSymbolQuantityPrice() throws Exception {
@@ -283,6 +311,8 @@ public class OrderControllerUnitTests {
 
     @Test
     void checkForCorrectOrder() throws Exception {
+        Mockito.when(symbolRegistryService.symbolExists(Mockito.anyString())).thenReturn(true);
+
         var body = Map.of(
                 "orderType", "LIMIT",
                 "orderSide", "BUY",

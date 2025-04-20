@@ -20,6 +20,19 @@ import java.util.List;
 @RestControllerAdvice
 public class OrderControllerAdvice  {
 
+    @ExceptionHandler(NonExistentTicker.class)
+    protected ErrorResponse handleNonExistentTicker(
+            NonExistentTicker ex,
+            WebRequest request)
+    {
+        return ErrorResponse.builder(ex, HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage())
+                .type(URI.create("http://localhost:8080/error/joemama"))
+                .title("Invalid order parameter(s)")
+                .instance(URI.create(request.getContextPath()))
+                .property("timestamp", Instant.now())
+                .build();
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     protected ErrorResponse handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex,
